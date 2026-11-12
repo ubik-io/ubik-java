@@ -1,0 +1,62 @@
+name: Release check
+
+# Run by hand before a first release, or after changing a secret: proves the
+# four release secrets work, without publishing anything.
+# - GPG_PRIVATE_KEY and GPG_PASSPHRASE: the jars are signed, and each
+#   signature verifies with the primary key.
+# - MAVEN_CENTRAL_USERNAME and MAVEN_CENTRAL_PASSWORD: the Central Publisher
+#   API accepts the token (a status query for an unknown deployment: 401 means
+#   the token is refused).
+
+on:
+  workflow_dispatch:
+  # Also on pull requests that change the release setup. Pull requests from
+  # forks get no secrets, so the job is skipped for them.
+  pull_request:
+    paths:
+      - .github/workflows/release.yml
+      - .github/workflows/release-check.yml
+      - pom.xml
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+      - name: Build and sign, without publishing
+        run: ./mvnw -B -ntp -P release -Dgpg.bestPractices=true verify
+        env:
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+      - name: Each signature verifies
+        run: |
+          count=0
+          for signature in target/*.asc; do
+            gpg --verify "$signature" "${signature%.asc}"
+            count=$((count + 1))
+          done
+          echo "$count signatures verified"
+          [ "$count" -ge 4 ]
+      - name: The Central Portal accepts the token
+        env:
+          MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+        run: |
+          token=$(printf '%s:%s' "$MAVEN_CENTRAL_USERNAME" "$MAVEN_CENTRAL_PASSWORD" | base64 -w0)
+          status=$(curl --silent --output /dev/null --write-out '%{http_code}' --request POST \
+            --header "Authorization: Bearer $token" \
+            "https://central.sonatype.com/api/v1/publisher/status?id=00000000-0000-0000-0000-000000000000")
+          echo "Central Portal answered HTTP $status"
+          if [ "$status" = 401 ] || [ "$status" = 403 ]; then
+            echo "The token is refused: generate a new one and update the two secrets" >&2
+            exit 1
+          fi

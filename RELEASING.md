@@ -19,9 +19,13 @@ A published version can't be deleted or replaced: fix a mistake with a new versi
 | Create a GPG key for signing, and publish its public key to keys.openpgp.org | Your machine |
 | Add the repository secrets `MAVEN_CENTRAL_USERNAME`, `MAVEN_CENTRAL_PASSWORD` (the token), `GPG_PRIVATE_KEY` (armored), `GPG_PASSPHRASE` | GitHub, Settings, Secrets and variables, Actions |
 
+## Check the setup
+
+Run the **Release check** workflow (Actions, Release check, Run workflow) after the setup and after changing a secret. It signs and verifies the jars and checks the Central token, without publishing anything.
+
 ## Each release
 
-1. `main` is green, including the API drift job.
+1. `main` is green, including the API drift job and the Release check.
 2. Pick the version: while it is 0.x, a change to the library's API raises the middle number.
 3. Tag `main` and push the tag: `git tag vX.Y.Z && git push origin vX.Y.Z`.
 4. Check that the Release workflow is green and that the version shows on <https://central.sonatype.com/artifact/io.ubik/ubik-java>.

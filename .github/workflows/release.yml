@@ -46,15 +46,15 @@ jobs:
           server-username: MAVEN_CENTRAL_USERNAME
           server-password: MAVEN_CENTRAL_PASSWORD
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
-          gpg-passphrase: GPG_PASSPHRASE
       - name: Set the version from the tag
         run: ./mvnw -B -ntp versions:set -DnewVersion="${GITHUB_REF_NAME#v}" -DgenerateBackupPoms=false
       - name: Publish to Maven Central
-        run: ./mvnw -B -ntp -P release deploy
+        run: ./mvnw -B -ntp -P release -Dgpg.bestPractices=true deploy
         env:
           MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
           MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
-          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          # The variable maven-gpg-plugin 3.2 reads the passphrase from.
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
       - name: GitHub release
         run: gh release create "$GITHUB_REF_NAME" --verify-tag --generate-notes target/ubik-java-*.jar
         env:
