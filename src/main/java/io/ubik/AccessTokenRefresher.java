@@ -73,6 +73,11 @@ final class AccessTokenRefresher {
     return token.value;
   }
 
+  /** Forgets this scope's token, after the API refused it. */
+  synchronized void invalidate(String scope) {
+    tokens.remove(scope);
+  }
+
   private AccessToken requestToken(String scope, Instant now) {
     String assertion = credentials.signAssertion(tokenUrl, now, UUID.randomUUID().toString());
     String body =
