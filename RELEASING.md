@@ -33,7 +33,7 @@ Run the **Release check** workflow (Actions, Release check, Run workflow) after 
 
 ## Docs version
 
-`.github/workflows/docs-version.yml` checks that the developer docs' Java install page shows the latest release. It runs by hand until the install page is live; then its daily schedule is turned on. When it is red, update the developer docs to the latest tag.
+`.github/workflows/docs-version.yml` checks that the developer docs' Java install page shows the latest release. It runs every day. When it is red, update the developer docs to the latest tag.
 
 ## API drift
 

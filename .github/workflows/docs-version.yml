@@ -2,11 +2,10 @@ name: Docs version
 
 # Checks that the developer docs' Java install page shows the latest release.
 # Red: update the docs (ubik-www sync-sdk-java.sh at the latest tag).
-# The schedule starts once the install page is live; until then, run it by hand.
 
 on:
-  # schedule:
-  #   - cron: "37 11 * * *"
+  schedule:
+    - cron: "37 11 * * *"
   workflow_dispatch:
 
 permissions:
