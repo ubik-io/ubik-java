@@ -65,7 +65,7 @@ import org.junit.jupiter.api.io.TempDir;
 class ExamplesTest {
 
   /** The snippet ids the developer docs cite. */
-  private static final List<String> DOCS_IDS =
+  static final List<String> DOCS_IDS =
       List.of(
           "client-setup", "first-call", "cdr-get", "cdr-list-window", "cdr-list-recorded",
           "channel-download", "mixdown-download", "channel-link", "mixdown-link",
