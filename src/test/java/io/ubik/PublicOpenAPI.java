@@ -36,13 +36,13 @@ import java.nio.charset.StandardCharsets;
 public final class PublicOpenAPI {
 
   /** The authentication file: UBIK API authentication. */
-  static final PublicOpenAPI AUTH = new PublicOpenAPI("/openapi/auth.yaml");
+  static final PublicOpenAPI AUTH = new PublicOpenAPI("/openapi/authentication.yaml");
 
   /** The webhook file: UBIK webhooks. */
-  public static final PublicOpenAPI WEBHOOK = new PublicOpenAPI("/openapi/webhook.yaml");
+  public static final PublicOpenAPI WEBHOOK = new PublicOpenAPI("/openapi/webhooks.yaml");
 
   /** The CDR file: UBIK API call history. */
-  static final PublicOpenAPI CDR = new PublicOpenAPI("/openapi/cdr.yaml");
+  static final PublicOpenAPI CDR = new PublicOpenAPI("/openapi/call-history.yaml");
 
   private final OpenApiInteractionValidator validator;
   private final OpenAPI openAPI;

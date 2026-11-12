@@ -75,8 +75,6 @@ public final class CdrDetail {
   private QualityInfo quality;
   @SerializedName("recording_session_list")
   private List<RecordingItem> recordingSessionList;
-  @SerializedName("recording_listen_allowed")
-  private boolean recordingListenAllowed;
 
   private CdrDetail() {}
 
@@ -319,11 +317,4 @@ public final class CdrDetail {
     return recordingSessionList == null ? Collections.emptyList() : Collections.unmodifiableList(recordingSessionList);
   }
 
-  /**
-   * True for an API key. False only for a UBIK agent acting for a user,
-   * <p>who gets the recordings without their files.
-   */
-  public boolean getRecordingListenAllowed() {
-    return recordingListenAllowed;
-  }
 }
