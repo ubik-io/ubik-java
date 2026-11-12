@@ -29,6 +29,11 @@ Run the **Release check** workflow (Actions, Release check, Run workflow) after 
 2. Pick the version: while it is 0.x, a change to the library's API raises the middle number.
 3. Tag `main` and push the tag: `git tag vX.Y.Z && git push origin vX.Y.Z`.
 4. Check that the Release workflow is green and that the version shows on <https://central.sonatype.com/artifact/io.ubik/ubik-java>.
+5. Ask for the developer docs update: they vendor `docs-examples-vX.Y.Z.zip` from the GitHub release.
+
+## Docs version
+
+`.github/workflows/docs-version.yml` checks that the developer docs' Java install page shows the latest release. It runs by hand until the install page is live; then its daily schedule is turned on. When it is red, update the developer docs to the latest tag.
 
 ## API drift
 
