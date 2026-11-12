@@ -33,10 +33,13 @@ import java.nio.charset.StandardCharsets;
  * Requests the library sends are checked against it, and stubs answer with
  * its examples, so the tests hold the library to the published contract.
  */
-final class PublicOpenAPI {
+public final class PublicOpenAPI {
 
   /** The authentication file: UBIK API authentication. */
   static final PublicOpenAPI AUTH = new PublicOpenAPI("/openapi/auth.yaml");
+
+  /** The webhook file: UBIK webhooks. */
+  public static final PublicOpenAPI WEBHOOK = new PublicOpenAPI("/openapi/webhook.yaml");
 
   /** The CDR file: UBIK API call history. */
   static final PublicOpenAPI CDR = new PublicOpenAPI("/openapi/cdr.yaml");
@@ -98,7 +101,7 @@ final class PublicOpenAPI {
   }
 
   /** The OpenAPI model, for tests that compare the library with the file. */
-  OpenAPI model() {
+  public OpenAPI model() {
     return openAPI;
   }
 

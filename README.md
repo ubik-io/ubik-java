@@ -68,7 +68,30 @@ for (CdrItem cdr : client.cdrs().list(request).iterateAll()) {
 }
 ```
 
-A value the API adds later, for example a new disposition, reads as `UNRECOGNIZED`; `getDispositionValue()` gives the value as sent.
+### Receive webhooks
+
+Check each request with your webhook's signing secret, then read its event. Pass the body exactly as received:
+
+```java
+WebhookVerifier verifier = WebhookVerifier.fromSecret(System.getenv("UBIK_WEBHOOK_SECRET"));
+
+WebhookEvent event;
+try {
+  event = verifier.verify(
+      request.getHeader("webhook-id"),
+      request.getHeader("webhook-timestamp"),
+      request.getHeader("webhook-signature"),
+      body);
+} catch (WebhookVerificationException e) {
+  // Not from UBIK, or too old: answer 400 and stop.
+}
+if (event.getType() == WebhookEventType.CDR_ADD) {
+  CdrDetail cdr = client.cdrs().get(event.getCdrAddEvent().getCdrId());
+}
+// Answer 2xx within 10 seconds, also for event types you don't handle.
+```
+
+A value the API adds later, for example a new disposition or event type, reads as `UNRECOGNIZED`; `getDispositionValue()` gives the value as sent.
 
 ## Build
 
