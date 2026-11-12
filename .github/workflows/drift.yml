@@ -1,0 +1,35 @@
+name: API drift
+
+# Every day, runs the tests against the OpenAPI files the developer site
+# publishes. Red means the published API and this library disagree: copy the
+# new files into src/test/resources/openapi, update the library, open a PR.
+
+on:
+  schedule:
+    - cron: "17 11 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+      - name: Download the published OpenAPI files
+        run: |
+          for name in authentication call-history webhooks; do
+            curl --fail --silent --show-error --location \
+              --output "src/test/resources/openapi/$name.yaml" \
+              "https://ubik.io/developers/openapi/$name.yaml"
+          done
+      - name: What changed since the pinned copies
+        run: git --no-pager diff --stat -- src/test/resources/openapi; git --no-pager diff -- src/test/resources/openapi > /tmp/openapi.diff; head -n 400 /tmp/openapi.diff
+      - name: Test against the published files
+        run: ./mvnw -B -ntp verify

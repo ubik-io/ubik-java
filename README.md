@@ -99,6 +99,10 @@ A value the API adds later, for example a new disposition or event type, reads a
 ./mvnw verify
 ```
 
+## Releases
+
+See [RELEASING.md](RELEASING.md).
+
 ## Documentation
 
 The UBIK API is documented at <https://ubik.io/en/developers/>.
