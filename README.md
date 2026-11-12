@@ -9,6 +9,33 @@ Java library for the UBIK API: CDRs, call recordings and webhooks.
 - Java 11 or later.
 - One runtime dependency: [Gson](https://github.com/google/gson) 2.10.1 or later, which itself depends on nothing.
 
+## Usage
+
+Create an API key for your organization in UBIK, and download its key file. Then create one client and share it:
+
+```java
+import io.ubik.ApiKeyCredentials;
+import io.ubik.UBIK;
+import io.ubik.UBIKOptions;
+import java.io.FileInputStream;
+import java.io.InputStream;
+
+ApiKeyCredentials credentials;
+try (InputStream in = new FileInputStream("/path/to/key-file.json")) {
+  credentials = ApiKeyCredentials.fromStream(in);
+}
+
+UBIK client = UBIKOptions.newBuilder()
+    .setOrgId("7d1f3a5c-2b4e-4f6a-8c9d-0e1f2a3b4c5d")
+    .setCredentials(credentials)
+    .build()
+    .getService();
+```
+
+The client gets its access tokens itself, and gets a new one before each expires. It is safe to use from several threads.
+
+Keep the key file secret: anyone who has it can call the API with the key's rights.
+
 ## Build
 
 ```bash
