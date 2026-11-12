@@ -16,6 +16,10 @@
 
 package io.ubik;
 
+import io.ubik.cdr.Cdrs;
+import io.ubik.cdr.Recordings;
+import io.ubik.internal.TokenSource;
+import io.ubik.internal.Transport;
 import java.net.http.HttpClient;
 import java.time.Clock;
 import java.time.Duration;
@@ -29,15 +33,45 @@ import java.time.Duration;
 public final class UBIK {
 
   private final UBIKOptions options;
-  private final HttpClient httpClient;
   private final AccessTokenRefresher accessTokenRefresher;
+  private final Cdrs cdrs;
+  private final Recordings recordings;
 
   UBIK(UBIKOptions options) {
     this.options = options;
-    this.httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
+    HttpClient httpClient = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
     this.accessTokenRefresher =
         new AccessTokenRefresher(
             options.getCredentials(), options.getHost(), httpClient, Clock.systemUTC());
+    Transport transport =
+        new Transport(
+            httpClient,
+            options.getHost(),
+            options.getOrgId(),
+            new TokenSource() {
+              @Override
+              public String getAccessToken(String scope) {
+                return accessTokenRefresher.getAccessToken(scope);
+              }
+
+              @Override
+              public void invalidate(String scope) {
+                accessTokenRefresher.invalidate(scope);
+              }
+            },
+            Version.USER_AGENT);
+    this.cdrs = new Cdrs(transport);
+    this.recordings = new Recordings(transport);
+  }
+
+  /** The CDRs of the organization: one record per call. */
+  public Cdrs cdrs() {
+    return cdrs;
+  }
+
+  /** The files of the CDRs' recordings. */
+  public Recordings recordings() {
+    return recordings;
   }
 
   /** The options this client was created with. */
@@ -45,12 +79,5 @@ public final class UBIK {
     return options;
   }
 
-  HttpClient getHttpClient() {
-    return httpClient;
-  }
 
-  /** An access token holding this scope, from the cache when still valid. */
-  String getAccessToken(String scope) {
-    return accessTokenRefresher.getAccessToken(scope);
-  }
 }

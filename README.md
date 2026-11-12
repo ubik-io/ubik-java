@@ -36,6 +36,40 @@ The client gets its access tokens itself, and gets a new one before each expires
 
 Keep the key file secret: anyone who has it can call the API with the key's rights.
 
+### Get a CDR and its recording
+
+A cdr-add webhook gives you a CDR's id. Get the CDR, then save each recording's mixdown (every party in one MP3 file):
+
+```java
+CdrDetail cdr = client.cdrs().get(cdrId);
+for (RecordingItem recording : cdr.getRecordingSessionList()) {
+  try {
+    client.recordings().downloadMixdownFile(
+        cdr.getId(), recording.getMixdownFileId(), Paths.get(recording.getRecordingSessionId() + ".mp3"));
+  } catch (RecordingNotReadyException e) {
+    // Not ready yet: try again later.
+  } catch (RecordingUnavailableException e) {
+    // This file will never exist: don't retry.
+  }
+}
+```
+
+### List CDRs
+
+Find the calls that ended while your webhook was inactive:
+
+```java
+ListCdrsRequest request = ListCdrsRequest.newBuilder()
+    .setStartTimestampMilli(Operator.GREATER_OR_EQUAL, from)
+    .setStartTimestampMilli(Operator.LESS, to)
+    .build();
+for (CdrItem cdr : client.cdrs().list(request).iterateAll()) {
+  // every CDR of every page, newest first
+}
+```
+
+A value the API adds later, for example a new disposition, reads as `UNRECOGNIZED`; `getDispositionValue()` gives the value as sent.
+
 ## Build
 
 ```bash
